@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3R - Dashboard Controle de Qualidade</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh}
+.ctn{max-width:900px;margin:0 auto;padding:16px}
+.hdr{background:#000080;padding:20px 16px;text-align:center;border-radius:0 0 20px 20px;margin:-16px -16px 20px;box-shadow:0 4px 20px rgba(0,0,128,.25)}
+.hdr h1{font-size:18px;font-weight:700;color:#fff;letter-spacing:2px;text-transform:uppercase}
+.hdr p{font-size:12px;color:rgba(255,255,255,.65);margin-top:4px}
+.filtros{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.filtros select{padding:10px 14px;border:2px solid #ddd;border-radius:10px;background:#fff;font-size:14px;font-family:inherit;cursor:pointer;min-width:140px}
+.filtros select:focus{outline:none;border-color:#000080}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.06);text-align:center;border-top:4px solid #ddd}
+.card.v{border-top-color:#E31E24}
+.card.c{border-top-color:#e67e22}
+.card.f{border-top-color:#000080}
+.card .num{font-size:32px;font-weight:700;margin:8px 0 4px}
+.card .lbl{font-size:12px;color:#666;text-transform:uppercase;letter-spacing:1px}
+.card.v .num{color:#E31E24}
+.card.c .num{color:#e67e22}
+.card.f .num{color:#000080}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.chart-box{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.chart-box h3{font-size:14px;font-weight:600;color:#333;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px}
+.chart-box canvas{max-height:280px}
+.full{grid-column:1/-1}
+.ranking{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.06);margin-bottom:20px}
+.ranking h3{font-size:14px;font-weight:600;color:#333;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px}
+.rank-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #eee}
+.rank-item:last-child{border:none}
+.rank-pos{width:28px;height:28px;border-radius:50%;background:#000080;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.rank-name{flex:1;font-size:14px;font-weight:500}
+.rank-count{font-size:18px;font-weight:700;color:#E31E24}
+.bar-item{margin-bottom:8px}
+.bar-label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px}
+.bar-track{height:8px;background:#eee;border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .3s}
+.loading{text-align:center;padding:60px;color:#666;font-size:16px}
+.back-link{display:inline-block;margin-bottom:16px;color:#000080;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer}
+.sem-dados{text-align:center;padding:40px;color:#999;font-size:14px}
+@media(max-width:600px){
+  .cards{grid-template-columns:1fr}
+  .chart-row{grid-template-columns:1fr}
+  .filtros{flex-direction:column}
+  .filtros select{width:100%}
+}
+</style>
+</head>
+<body>
+<div class="ctn">
+  <div class="hdr">
+    <h1>Dashboard - Controle de Qualidade</h1>
+    <p>3R Materiais para Construcao</p>
+  </div>
+
+  <a class="back-link" id="backLink">Voltar ao formulario</a>
+
+  <div class="filtros">
+    <select id="fSetor">
+      <option value="todos">Todos os setores</option>
+      <option value="vendas">Vendas</option>
+      <option value="caixa">Caixa</option>
+      <option value="financeiro">Financeiro</option>
+    </select>
+    <select id="fPeriodo">
+      <option value="mes">Mes atual</option>
+      <option value="ano">Ano inteiro</option>
+      <option value="todos">Todos os registros</option>
+    </select>
+  </div>
+
+  <div id="conteudo"><div class="loading">Carregando dados...</div></div>
+</div>
+
+<script>
+var URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbzOfOKPOvAz6lU03uSYahSsDdmB01v5ZiWHUDZJX_jZ_yI3I9_Q_InOG2zFmeEctf4F/exec';
+var DADOS = null;
+var chartPizza = null, chartColunas = null, chartTipos = null, chartEvo = null;
+
+document.getElementById('backLink').href = window.location.href.replace('dashboard.html','index.html');
+
+async function carregarDados() {
+  try {
+    var resp = await fetch(URL_SCRIPT + '?action=data');
+    DADOS = await resp.json();
+    renderizar();
+  } catch(e) {
+    document.getElementById('conteudo').innerHTML = '<div class="loading">Erro ao carregar dados. Verifique a conexao.</div>';
+  }
+}
+
+function filtrar() {
+  var setor = document.getElementById('fSetor').value;
+  var periodo = document.getElementById('fPeriodo').value;
+  var agora = new Date();
+  var mesAtual = agora.getMonth() + 1;
+  var anoAtual = agora.getFullYear();
+
+  var setores = setor === 'todos' ? ['vendas','caixa','financeiro'] : [setor];
+  var result = { vendas: [], caixa: [], financeiro: [] };
+
+  setores.forEach(function(s) {
+    if (!DADOS[s]) return;
+    result[s] = DADOS[s].filter(function(r) {
+      if (periodo === 'mes') return r.mes === mesAtual && r.ano === anoAtual;
+      if (periodo === 'ano') return r.ano === anoAtual;
+      return true;
+    });
+  });
+
+  return { dados: result, setores: setores };
+}
+
+function renderizar() {
+  var f = filtrar();
+  var d = f.dados;
+  var setoresAtivos = f.setores;
+
+  var totalV = d.vendas.length;
+  var totalC = d.caixa.length;
+  var totalF = d.financeiro.length;
+  var total = totalV + totalC + totalF;
+
+  var html = '';
+
+  // Cards
+  html += '<div class="cards">';
+  if (setoresAtivos.indexOf('vendas') >= 0)
+    html += '<div class="card v"><div class="lbl">Vendas</div><div class="num">' + totalV + '</div></div>';
+  if (setoresAtivos.indexOf('caixa') >= 0)
+    html += '<div class="card c"><div class="lbl">Caixa</div><div class="num">' + totalC + '</div></div>';
+  if (setoresAtivos.indexOf('financeiro') >= 0)
+    html += '<div class="card f"><div class="lbl">Financeiro</div><div class="num">' + totalF + '</div></div>';
+  html += '</div>';
+
+  if (total === 0) {
+    html += '<div class="sem-dados">Nenhum registro encontrado para o filtro selecionado.</div>';
+    document.getElementById('conteudo').innerHTML = html;
+    return;
+  }
+
+  // Graficos
+  html += '<div class="chart-row">';
+  html += '<div class="chart-box"><h3>Distribuicao por setor</h3><canvas id="cPizza"></canvas></div>';
+  html += '<div class="chart-box"><h3>Total por setor</h3><canvas id="cColunas"></canvas></div>';
+  html += '</div>';
+
+  // Tipos de NC
+  html += '<div class="chart-row"><div class="chart-box full"><h3>Tipos de nao conformidade mais frequentes</h3><canvas id="cTipos"></canvas></div></div>';
+
+  // Evolucao mensal
+  html += '<div class="chart-row"><div class="chart-box full"><h3>Evolucao mensal</h3><canvas id="cEvo"></canvas></div></div>';
+
+  // Ranking vendedores
+  if (setoresAtivos.indexOf('vendas') >= 0 && totalV > 0) {
+    var vendedores = {};
+    d.vendas.forEach(function(r) {
+      vendedores[r.vendedor] = (vendedores[r.vendedor] || 0) + 1;
+    });
+    var rankOrd = Object.entries(vendedores).sort(function(a,b){return b[1]-a[1]});
+
+    html += '<div class="ranking"><h3>Ranking de vendedores</h3>';
+    rankOrd.forEach(function(item, i) {
+      html += '<div class="rank-item"><div class="rank-pos">' + (i+1) + '</div><div class="rank-name">' + item[0] + '</div><div class="rank-count">' + item[1] + '</div></div>';
+    });
+    html += '</div>';
+  }
+
+  document.getElementById('conteudo').innerHTML = html;
+
+  // Renderizar graficos
+  var coresSetor = ['#E31E24','#e67e22','#000080'];
+  var labelsSetor = [];
+  var valoresSetor = [];
+  if (setoresAtivos.indexOf('vendas')>=0) { labelsSetor.push('Vendas'); valoresSetor.push(totalV); }
+  if (setoresAtivos.indexOf('caixa')>=0) { labelsSetor.push('Caixa'); valoresSetor.push(totalC); }
+  if (setoresAtivos.indexOf('financeiro')>=0) { labelsSetor.push('Financeiro'); valoresSetor.push(totalF); }
+  var coresUsadas = labelsSetor.map(function(l){ return l==='Vendas'?'#E31E24':l==='Caixa'?'#e67e22':'#000080'; });
+
+  // Pizza
+  new Chart(document.getElementById('cPizza'), {
+    type: 'doughnut',
+    data: { labels: labelsSetor, datasets: [{ data: valoresSetor, backgroundColor: coresUsadas, borderWidth: 2, borderColor: '#fff' }] },
+    options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { padding: 16, font: { size: 13 } } } } }
+  });
+
+  // Colunas
+  new Chart(document.getElementById('cColunas'), {
+    type: 'bar',
+    data: { labels: labelsSetor, datasets: [{ data: valoresSetor, backgroundColor: coresUsadas, borderRadius: 6, maxBarThickness: 60 }] },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+  });
+
+  // Tipos de NC
+  var tiposContagem = {};
+  setoresAtivos.forEach(function(s) {
+    d[s].forEach(function(r) {
+      r.tipos.split(', ').forEach(function(t) {
+        t = t.trim();
+        if (t) tiposContagem[t] = (tiposContagem[t] || 0) + 1;
+      });
+    });
+  });
+  var tiposOrd = Object.entries(tiposContagem).sort(function(a,b){return b[1]-a[1]}).slice(0, 10);
+  var tiposLabels = tiposOrd.map(function(t){return t[0]});
+  var tiposValores = tiposOrd.map(function(t){return t[1]});
+  var tiposCores = tiposLabels.map(function(l,i){
+    var palette = ['#E31E24','#000080','#e67e22','#2ecc71','#9b59b6','#1abc9c','#e74c3c','#3498db','#f39c12','#34495e'];
+    return palette[i % palette.length];
+  });
+
+  new Chart(document.getElementById('cTipos'), {
+    type: 'bar',
+    data: { labels: tiposLabels, datasets: [{ data: tiposValores, backgroundColor: tiposCores, borderRadius: 4, maxBarThickness: 50 }] },
+    options: {
+      responsive: true, indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+  });
+
+  // Evolucao mensal
+  var mesesMap = {};
+  var agora = new Date();
+  for (var i = 5; i >= 0; i--) {
+    var dt = new Date(agora.getFullYear(), agora.getMonth() - i, 1);
+    var key = dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0');
+    var label = dt.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
+    mesesMap[key] = { label: label, vendas: 0, caixa: 0, financeiro: 0 };
+  }
+
+  ['vendas','caixa','financeiro'].forEach(function(s) {
+    if (!DADOS[s]) return;
+    DADOS[s].forEach(function(r) {
+      var key = r.ano + '-' + String(r.mes).padStart(2,'0');
+      if (mesesMap[key]) mesesMap[key][s]++;
+    });
+  });
+
+  var evoKeys = Object.keys(mesesMap);
+  var evoLabels = evoKeys.map(function(k){return mesesMap[k].label});
+  var datasets = [];
+  if (setoresAtivos.indexOf('vendas')>=0) datasets.push({ label:'Vendas', data:evoKeys.map(function(k){return mesesMap[k].vendas}), backgroundColor:'rgba(227,30,36,.7)', borderColor:'#E31E24', borderWidth:2, borderRadius:4 });
+  if (setoresAtivos.indexOf('caixa')>=0) datasets.push({ label:'Caixa', data:evoKeys.map(function(k){return mesesMap[k].caixa}), backgroundColor:'rgba(230,126,34,.7)', borderColor:'#e67e22', borderWidth:2, borderRadius:4 });
+  if (setoresAtivos.indexOf('financeiro')>=0) datasets.push({ label:'Financeiro', data:evoKeys.map(function(k){return mesesMap[k].financeiro}), backgroundColor:'rgba(0,0,128,.7)', borderColor:'#000080', borderWidth:2, borderRadius:4 });
+
+  new Chart(document.getElementById('cEvo'), {
+    type: 'bar',
+    data: { labels: evoLabels, datasets: datasets },
+    options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, plugins: { legend: { position: 'bottom' } } }
+  });
+}
+
+document.getElementById('fSetor').addEventListener('change', renderizar);
+document.getElementById('fPeriodo').addEventListener('change', renderizar);
+
+carregarDados();
+</script>
+</body>
+</html>
