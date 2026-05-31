@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>3R Materiais - Controle de Qualidade</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,COLE_AQUI_O_FAVICON_BASE64">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#1a1a2e;
+  --surface:#16213e;
+  --surface2:#0f3460;
+  --text:#e8e8e8;
+  --text-muted:#8a8a9a;
+  --red:#E31E24;
+  --red-dark:#b8181d;
+  --blue:#000080;
+  --green:#2ecc71;
+  --orange:#e67e22;
+  --vendas:#E31E24;
+  --caixa:#e67e22;
+  --financeiro:#3498db;
+  --border:rgba(255,255,255,0.08);
+  --radius:12px;
+}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-tap-highlight-color:transparent}
+.container{max-width:540px;margin:0 auto;padding:16px}
+
+/* HEADER */
+.header{text-align:center;padding:20px 0 10px;border-bottom:1px solid var(--border);margin-bottom:20px}
+.header img{height:50px;margin-bottom:8px}
+.header h1{font-size:14px;font-weight:600;color:var(--text-muted);letter-spacing:3px;text-transform:uppercase}
+.header .subtitle{font-size:11px;color:var(--text-muted);margin-top:4px;letter-spacing:1px}
+
+/* SETOR INDICATOR */
+.setor-indicator{display:none;align-items:center;gap:10px;padding:12px 16px;border-radius:var(--radius);margin-bottom:20px;cursor:pointer;transition:opacity .2s}
+.setor-indicator:hover{opacity:.85}
+.setor-indicator .dot{width:12px;height:12px;border-radius:50%}
+.setor-indicator .setor-label{font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.setor-indicator .voltar{margin-left:auto;font-size:11px;color:var(--text-muted);text-decoration:underline}
+
+/* BOTOES SETOR */
+.setor-grid{display:flex;flex-direction:column;gap:12px}
+.setor-btn{display:flex;align-items:center;gap:16px;padding:22px 20px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);cursor:pointer;transition:all .2s;text-align:left}
+.setor-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.setor-btn:active{transform:scale(.98)}
+.setor-btn .icon{font-size:28px;width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.setor-btn .info h3{font-size:16px;font-weight:600;color:var(--text)}
+.setor-btn .info p{font-size:12px;color:var(--text-muted);margin-top:2px}
+.setor-btn[data-setor="vendas"] .icon{background:rgba(227,30,36,.15);color:var(--vendas)}
+.setor-btn[data-setor="caixa"] .icon{background:rgba(230,126,34,.15);color:var(--caixa)}
+.setor-btn[data-setor="financeiro"] .icon{background:rgba(52,152,219,.15);color:var(--financeiro)}
+
+/* FORM */
+.form-section{display:none}
+.form-section.active{display:block}
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase}
+.form-group label .req{color:var(--red);margin-left:2px}
+
+/* SELECT */
+select{width:100%;padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:15px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='%238a8a9a'%3E%3Cpath d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;cursor:pointer}
+select:focus{outline:none;border-color:var(--red)}
+
+/* CHECKBOXES */
+.checkbox-grid{display:flex;flex-direction:column;gap:8px}
+.checkbox-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);cursor:pointer;transition:all .15s;user-select:none;-webkit-user-select:none}
+.checkbox-item:active{transform:scale(.98)}
+.checkbox-item.checked{border-color:var(--red);background:rgba(227,30,36,.08)}
+.checkbox-item input{display:none}
+.check-box{width:22px;height:22px;border:2px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.checkbox-item.checked .check-box{background:var(--red);border-color:var(--red)}
+.check-box svg{width:14px;height:14px;stroke:#fff;stroke-width:3;fill:none;opacity:0;transition:opacity .15s}
+.checkbox-item.checked .check-box svg{opacity:1}
+.checkbox-item span{font-size:14px;color:var(--text);line-height:1.3}
+
+/* TEXTAREA */
+textarea{width:100%;padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:15px;font-family:inherit;resize:vertical;min-height:100px}
+textarea:focus{outline:none;border-color:var(--red)}
+textarea::placeholder{color:var(--text-muted)}
+
+/* FOTOS */
+.foto-area{border:2px dashed var(--border);border-radius:var(--radius);padding:20px;text-align:center}
+.foto-btns{display:flex;gap:10px;justify-content:center;margin-bottom:12px}
+.foto-btn{display:flex;align-items:center;gap:8px;padding:12px 20px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:14px;cursor:pointer;transition:all .15s}
+.foto-btn:active{transform:scale(.96)}
+.foto-btn svg{width:20px;height:20px;stroke:var(--red)}
+.foto-btn input{display:none}
+.foto-preview{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.foto-thumb{position:relative;width:72px;height:72px;border-radius:8px;overflow:hidden}
+.foto-thumb img{width:100%;height:100%;object-fit:cover}
+.foto-thumb .remove{position:absolute;top:2px;right:2px;width:22px;height:22px;background:rgba(0,0,0,.7);border:none;border-radius:50%;color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+.foto-count{font-size:12px;color:var(--text-muted);margin-top:8px}
+
+/* SUBMIT */
+.submit-btn{width:100%;padding:16px;border:none;border-radius:var(--radius);background:var(--red);color:#fff;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all .2s;margin-top:10px}
+.submit-btn:hover{background:var(--red-dark)}
+.submit-btn:active{transform:scale(.98)}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+/* PROGRESS */
+.progress-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(26,26,46,.95);z-index:100;align-items:center;justify-content:center;flex-direction:column;gap:20px}
+.progress-overlay.active{display:flex}
+.progress-bar-wrap{width:280px;height:6px;background:var(--surface);border-radius:3px;overflow:hidden}
+.progress-bar{height:100%;background:var(--red);border-radius:3px;width:0%;transition:width .3s}
+.progress-text{font-size:14px;color:var(--text-muted);text-align:center}
+.progress-spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* SUCCESS */
+.success-screen{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:100;align-items:center;justify-content:center;flex-direction:column;padding:24px}
+.success-screen.active{display:flex}
+.success-icon{width:72px;height:72px;border-radius:50%;background:rgba(46,204,113,.15);display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+.success-icon svg{width:36px;height:36px;stroke:var(--green);stroke-width:3;fill:none}
+.success-title{font-size:20px;font-weight:700;margin-bottom:8px}
+.success-subtitle{font-size:14px;color:var(--text-muted);margin-bottom:24px;text-align:center}
+.success-summary{width:100%;max-width:400px;background:var(--surface);border-radius:var(--radius);padding:16px;margin-bottom:24px;font-size:13px;line-height:1.6}
+.success-summary .row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)}
+.success-summary .row:last-child{border:none}
+.success-summary .row .label{color:var(--text-muted)}
+.success-summary .row .value{color:var(--text);font-weight:600;text-align:right;max-width:60%}
+.novo-btn{padding:14px 32px;border:1px solid var(--red);border-radius:var(--radius);background:transparent;color:var(--red);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s}
+.novo-btn:hover{background:var(--red);color:#fff}
+
+/* ERROR */
+.error-msg{display:none;padding:12px 16px;border-radius:var(--radius);background:rgba(227,30,36,.1);border:1px solid rgba(227,30,36,.3);color:var(--red);font-size:13px;margin-bottom:16px}
+
+/* VALIDATION */
+.invalid{border-color:var(--red) !important}
+.field-error{font-size:11px;color:var(--red);margin-top:4px;display:none}
+
+/* RESPONSIVE */
+@media(max-width:380px){
+  .container{padding:12px}
+  .setor-btn{padding:16px}
+  .foto-btns{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- HEADER -->
+  <div class="header">
+    <!-- SUBSTITUA O src ABAIXO PELA SUA LOGO EM BASE64 -->
+    <img src="data:image/jpeg;base64,COLE_AQUI_A_LOGO_BASE64" alt="3R Materiais" id="logoImg"
+         onerror="this.style.display='none'">
+    <h1>Controle de Qualidade</h1>
+    <div class="subtitle">Sistema de Registro de Nao Conformidades</div>
+  </div>
+
+  <!-- INDICADOR DE SETOR (aparece quando um setor esta selecionado) -->
+  <div class="setor-indicator" id="setorIndicator" onclick="voltarMenu()">
+    <div class="dot" id="setorDot"></div>
+    <span class="setor-label" id="setorLabel"></span>
+    <span class="voltar">Voltar</span>
+  </div>
+
+  <!-- TELA INICIAL - SELECAO DE SETOR -->
+  <div id="menuSetor">
+    <div class="setor-grid">
+      <div class="setor-btn" data-setor="vendas" onclick="selecionarSetor('vendas')">
+        <div class="icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+        </div>
+        <div class="info">
+          <h3>Vendas</h3>
+          <p>Entregas, notas, materiais</p>
+        </div>
+      </div>
+      <div class="setor-btn" data-setor="caixa" onclick="selecionarSetor('caixa')">
+        <div class="icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        </div>
+        <div class="info">
+          <h3>Caixa</h3>
+          <p>Notas, enderecos, conferencias</p>
+        </div>
+      </div>
+      <div class="setor-btn" data-setor="financeiro" onclick="selecionarSetor('financeiro')">
+        <div class="icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <div class="info">
+          <h3>Financeiro</h3>
+          <p>WhatsApp, e-mail, RH, EPIs</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORMULARIO VENDAS -->
+  <div class="form-section" id="formVendas">
+    <form id="frmVendas" onsubmit="return false">
+      <div class="form-group">
+        <label>Vendedor Responsavel <span class="req">*</span></label>
+        <select id="vendedor" required>
+          <option value="">Selecione o vendedor</option>
+          <option value="Vendedor 1">Vendedor 1</option>
+          <option value="Vendedor 2">Vendedor 2</option>
+          <option value="Vendedor 3">Vendedor 3</option>
+          <option value="Vendedor 4">Vendedor 4</option>
+          <option value="Vendedor 5">Vendedor 5</option>
+        </select>
+        <div class="field-error" id="errVendedor">Selecione o vendedor responsavel</div>
+      </div>
+
+      <div class="form-group">
+        <label>Tipo de Nao Conformidade <span class="req">*</span></label>
+        <div class="checkbox-grid" id="ncVendas">
+          <label class="checkbox-item" onclick="toggleCheck(this)">
+            <input type="checkbox" value="Entrega voltou">
+            <div class="check-box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span>Entrega voltou</span>
+          </label>
+          <label class="checkbox-item" onclick="toggleCheck(this)">
+            <input type="checkbox" value="Material nao separado">
+            <div class="check-box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span>Material nao separado</span>
+          </label>
+          <label class="checkbox-item" onclick="toggleCheck(this)">
+            <input type="checkbox" value="Endereco insuficiente">
+            <div class="check-box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span>Endereco insuficiente</span>
+          </label>
+          <label class="checkbox-item" onclick="toggleCheck(this)">
+            <input type="checkbox" value="Nota foi errada ao caixa">
+            <div class="check-box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span>Nota foi errada ao caixa</span>
+          </label>
+          <label class="checkbox-item" onclick="toggleCheck(this)">
+            <input type="checkbox" value="Material nao especificado">
+            <div class="check-box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span>Material nao especificado</span>
+          </label>
+        </div>
+        <div class="field-error" id="errNcVendas">Selecione pelo menos um tipo</div>
+      </div>
+
+      <div class="form-group">
+        <label>Descricao <span class="req">*</span></label>
+        <textarea id="descVendas" placeholder="Descreva a nao conformidade com detalhes..." required></textarea>
+        <div class="field-error" id="errDescVendas">A descricao e obrigatoria</div>
+      </div>
+
+      <div class="form-group">
+        <label>Fotos (opcional)</label>
+        <div class="foto-area">
+          <div class="foto-btns">
+            <button type="button" class="foto-btn" onclick="this.querySelector('input').click()">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              Camera
+              <input type="file" accept="image/*" capture="environment" multiple onchange="addFotos(this.files)">
+            </button>
+            <button type="button" class="foto-btn" onclick="this.querySelector('input').click()">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              Galeria
+              <input type="file" accept="image/*" multiple onchange="addFotos(this.files)">
+            </button>
+          </div>
+          <div class="foto-preview" id="fotoPreview"></div>
+          <div class="foto-count" id="fotoCount"></div>
+        </div>
+      </div>
+
+      <div class="error-msg" id="errorVendas"></div>
+      <button type="button" class="submit-btn" onclick="enviar('vendas')" id="btnVendas">REGISTRAR NAO CONFORMIDADE</button>
+    </form>
+  </div>
+
+  <!-- FORMULARIO CAIXA -->
+  <div class="form-section" id="formCaixa">
+    <form id="frmCaixa" onsubmit="return false">
+      <div class="form-group">
+        <label>Tipo de Nao Conformidade <span class="req">*</span></label>
+        <div class="checkbox-grid" id="ncCaixa">
+          <label class="checkbox-item" onclick="toggleCheck(this)">
+            <input type="checkbox" value="Nota perdida">
+            <div class="check-box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span>Nota perdida</span>
+          </label>
+          <label class="checkbox-item" onclick="toggleCheck(this)">
+            <input type="checkbox" value="Endereco antigo nao riscado">
+            <div class="check-box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span>Endereco antigo nao riscado</span>
+          </label>
+          <label class="checkbox-item" onclick="toggleCheck(this)">
+            <input type="checkbox" value="Nao confirmou endereco com cliente">
+            <div class="check-box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span>Nao confirmou endereco com cliente</span>
+          </label>
+        </div>
+        <div class="field-error" id="errNcCaixa">Selecione pelo menos um tipo</div>
+      </div>
+
+      <div class="form-group">
+        <label>Descricao <span class="req">*</span></label>
+        <textarea id="descCaixa" placeholder="Descreva a nao conformidade com detalhes..." required></textarea>
+        <div class="field-error" id="errDescCaixa">A descricao e obrigatoria</div>
+      </div>
+
+      <div class="error-msg" id="errorCaixa"></div>
+      <button type="button" class="submit-btn" onclick="enviar('caixa')" id="btnCaixa">REGISTRAR NAO CONFORMIDADE</button>
+    </form>
+  </div>
+
+  <!-- FORMULARIO FINANCEIRO -->
+  <div class="form-section" id="formFinanceiro">
+    <form id="frmFinanceiro" onsubmit="return false">
+      <div class="form-group">
+        <label>Tipo de Nao Conformidade <span class="req">*</span></label>
+        <div class="checkbox-grid" id="ncFinanceiro">
+          <label class="checkbox-item" onclick="toggleCheck(this)">
+            <input type="checkbox" value="WhatsApp sem responder">
+            <div class="check-box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span>WhatsApp sem responder</span>
+          </label>
+          <label class="checkbox-item" onclick="toggleCheck(this)">
+            <input type="checkbox" value="E-mail sem responder">
+            <div class="check-box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span>E-mail sem responder</span>
+          </label>
+          <label class="checkbox-item" onclick="toggleCheck(this)">
+            <input type="checkbox" value="Respostas fora do padrao da loja">
+            <div class="check-box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span>Respostas fora do padrao da loja</span>
+          </label>
+          <label class="checkbox-item" onclick="toggleCheck(this)">
+            <input type="checkbox" value="Nao preenchimento correto da ficha de EPI">
+            <div class="check-box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span>Nao preenchimento correto da ficha de EPI</span>
+          </label>
+          <label class="checkbox-item" onclick="toggleCheck(this)">
+            <input type="checkbox" value="Processo errado no RH">
+            <div class="check-box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span>Processo errado no RH</span>
+          </label>
+        </div>
+        <div class="field-error" id="errNcFinanceiro">Selecione pelo menos um tipo</div>
+      </div>
+
+      <div class="form-group">
+        <label>Descricao <span class="req">*</span></label>
+        <textarea id="descFinanceiro" placeholder="Descreva a nao conformidade com detalhes..." required></textarea>
+        <div class="field-error" id="errDescFinanceiro">A descricao e obrigatoria</div>
+      </div>
+
+      <div class="error-msg" id="errorFinanceiro"></div>
+      <button type="button" class="submit-btn" onclick="enviar('financeiro')" id="btnFinanceiro">REGISTRAR NAO CONFORMIDADE</button>
+    </form>
+  </div>
+</div>
+
+<!-- BARRA DE PROGRESSO -->
+<div class="progress-overlay" id="progressOverlay">
+  <div class="progress-spinner"></div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+  <div class="progress-text" id="progressText">Enviando registro...</div>
+</div>
+
+<!-- TELA DE SUCESSO -->
+<div class="success-screen" id="successScreen">
+  <div class="success-icon">
+    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <div class="success-title">Registro Enviado</div>
+  <div class="success-subtitle">A nao conformidade foi registrada com sucesso.</div>
+  <div class="success-summary" id="successSummary"></div>
+  <button class="novo-btn" onclick="novoRegistro()">Novo Registro</button>
+</div>
+
+<script>
+// ============================================================
+// CONFIGURACAO — SUBSTITUA A URL ABAIXO PELA SUA WEB APP
+// ============================================================
+const APPS_SCRIPT_URL = 'COLE_AQUI_A_URL_DO_APPS_SCRIPT';
+
+// Estado
+let setorAtual = null;
+let fotos = []; // array de {file, dataUrl}
+
+// Cores por setor
+const CORES = {
+  vendas: '#E31E24',
+  caixa: '#e67e22',
+  financeiro: '#3498db'
+};
+
+// ============================================================
+// NAVEGACAO
+// ============================================================
+function selecionarSetor(setor) {
+  setorAtual = setor;
+  document.getElementById('menuSetor').style.display = 'none';
+
+  // Indicador de setor
+  const ind = document.getElementById('setorIndicator');
+  ind.style.display = 'flex';
+  ind.style.background = CORES[setor] + '15';
+  ind.style.borderLeft = '4px solid ' + CORES[setor];
+  document.getElementById('setorDot').style.background = CORES[setor];
+  document.getElementById('setorLabel').textContent = setor.charAt(0).toUpperCase() + setor.slice(1);
+
+  // Mostrar formulario
+  document.getElementById('form' + capitalize(setor)).classList.add('active');
+
+  // Cor do botao submit
+  const btn = document.getElementById('btn' + capitalize(setor));
+  btn.style.background = CORES[setor];
+}
+
+function voltarMenu() {
+  if (setorAtual) {
+    document.getElementById('form' + capitalize(setorAtual)).classList.remove('active');
+  }
+  document.getElementById('setorIndicator').style.display = 'none';
+  document.getElementById('menuSetor').style.display = 'block';
+  limparFormulario();
+  setorAtual = null;
+}
+
+function capitalize(s) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+// ============================================================
+// CHECKBOXES
+// ============================================================
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+  const input = el.querySelector('input');
+  input.checked = !input.checked;
+}
+
+// ============================================================
+// FOTOS (apenas Vendas)
+// ============================================================
+function addFotos(files) {
+  for (let f of files) {
+    if (!f.type.startsWith('image/')) continue;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      fotos.push({ file: f, dataUrl: e.target.result });
+      renderFotos();
+    };
+    reader.readAsDataURL(f);
+  }
+}
+
+function removeFoto(idx) {
+  fotos.splice(idx, 1);
+  renderFotos();
+}
+
+function renderFotos() {
+  const preview = document.getElementById('fotoPreview');
+  const count = document.getElementById('fotoCount');
+  preview.innerHTML = '';
+  fotos.forEach((foto, i) => {
+    const div = document.createElement('div');
+    div.className = 'foto-thumb';
+    div.innerHTML = '<img src="' + foto.dataUrl + '" alt="Foto">' +
+      '<button class="remove" onclick="event.stopPropagation();removeFoto(' + i + ')">x</button>';
+    preview.appendChild(div);
+  });
+  count.textContent = fotos.length > 0 ? fotos.length + ' foto(s) selecionada(s)' : '';
+}
+
+// ============================================================
+// COMPRESSAO DE IMAGEM
+// ============================================================
+function comprimirImagem(dataUrl) {
+  return new Promise(function(resolve) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      let w = img.width;
+      let h = img.height;
+      const MAX = 800;
+      if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+        else { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', 0.7));
+    };
+    img.src = dataUrl;
+  });
+}
+
+// ============================================================
+// VALIDACAO
+// ============================================================
+function validar(setor) {
+  let ok = true;
+
+  // Limpar erros
+  document.querySelectorAll('.field-error').forEach(function(el) { el.style.display = 'none'; });
+  document.querySelectorAll('.invalid').forEach(function(el) { el.classList.remove('invalid'); });
+
+  if (setor === 'vendas') {
+    const vend = document.getElementById('vendedor');
+    if (!vend.value) {
+      vend.classList.add('invalid');
+      document.getElementById('errVendedor').style.display = 'block';
+      ok = false;
+    }
+  }
+
+  // Checkboxes
+  const ncId = 'nc' + capitalize(setor);
+  const checks = document.querySelectorAll('#' + ncId + ' input:checked');
+  if (checks.length === 0) {
+    document.getElementById('errNc' + capitalize(setor)).style.display = 'block';
+    ok = false;
+  }
+
+  // Descricao
+  const desc = document.getElementById('desc' + capitalize(setor));
+  if (!desc.value.trim()) {
+    desc.classList.add('invalid');
+    document.getElementById('errDesc' + capitalize(setor)).style.display = 'block';
+    ok = false;
+  }
+
+  return ok;
+}
+
+// ============================================================
+// ENVIO
+// ============================================================
+async function enviar(setor) {
+  if (!validar(setor)) return;
+
+  const btn = document.getElementById('btn' + capitalize(setor));
+  btn.disabled = true;
+
+  const overlay = document.getElementById('progressOverlay');
+  const bar = document.getElementById('progressBar');
+  const text = document.getElementById('progressText');
+  overlay.classList.add('active');
+  bar.style.width = '10%';
+  text.textContent = 'Preparando dados...';
+
+  try {
+    // Coletar dados
+    const tipos = [];
+    document.querySelectorAll('#nc' + capitalize(setor) + ' input:checked').forEach(function(cb) {
+      tipos.push(cb.value);
+    });
+    const descricao = document.getElementById('desc' + capitalize(setor)).value.trim();
+
+    const payload = {
+      setor: setor,
+      tipos: tipos.join(', '),
+      descricao: descricao,
+      dataHora: new Date().toLocaleString('pt-BR', { timeZone: 'America/Cuiaba' })
+    };
+
+    if (setor === 'vendas') {
+      payload.vendedor = document.getElementById('vendedor').value;
+
+      // Comprimir e codificar fotos
+      bar.style.width = '20%';
+      text.textContent = 'Comprimindo fotos...';
+      const fotosBase64 = [];
+      for (let i = 0; i < fotos.length; i++) {
+        text.textContent = 'Comprimindo foto ' + (i + 1) + ' de ' + fotos.length + '...';
+        bar.style.width = (20 + (i / fotos.length) * 40) + '%';
+        const comprimida = await comprimirImagem(fotos[i].dataUrl);
+        fotosBase64.push(comprimida);
+      }
+      payload.fotos = fotosBase64;
+      payload.qtdFotos = fotosBase64.length;
+    }
+
+    bar.style.width = '70%';
+    text.textContent = 'Enviando para o servidor...';
+
+    // Enviar para Apps Script
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    });
+
+    bar.style.width = '100%';
+    text.textContent = 'Registro salvo!';
+
+    await new Promise(function(r) { setTimeout(r, 600); });
+    overlay.classList.remove('active');
+
+    // Tela de sucesso
+    mostrarSucesso(setor, payload, tipos);
+
+  } catch (err) {
+    overlay.classList.remove('active');
+    const errEl = document.getElementById('error' + capitalize(setor));
+    errEl.textContent = 'Erro ao enviar: ' + err.message + '. Tente novamente.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+  }
+}
+
+// ============================================================
+// TELA DE SUCESSO
+// ============================================================
+function mostrarSucesso(setor, payload, tipos) {
+  const summary = document.getElementById('successSummary');
+  let html = '<div class="row"><span class="label">Setor</span><span class="value">' + capitalize(setor) + '</span></div>';
+  html += '<div class="row"><span class="label">Data/Hora</span><span class="value">' + payload.dataHora + '</span></div>';
+
+  if (setor === 'vendas') {
+    html += '<div class="row"><span class="label">Vendedor</span><span class="value">' + payload.vendedor + '</span></div>';
+  }
+
+  html += '<div class="row"><span class="label">Tipo(s)</span><span class="value">' + tipos.join(', ') + '</span></div>';
+  html += '<div class="row"><span class="label">Descricao</span><span class="value">' + payload.descricao.substring(0, 80) + (payload.descricao.length > 80 ? '...' : '') + '</span></div>';
+
+  if (setor === 'vendas') {
+    html += '<div class="row"><span class="label">Fotos</span><span class="value">' + (payload.qtdFotos || 0) + ' foto(s)</span></div>';
+  }
+
+  summary.innerHTML = html;
+  document.getElementById('successScreen').classList.add('active');
+}
+
+// ============================================================
+// NOVO REGISTRO
+// ============================================================
+function novoRegistro() {
+  document.getElementById('successScreen').classList.remove('active');
+  limparFormulario();
+  voltarMenu();
+}
+
+function limparFormulario() {
+  // Limpar checkboxes
+  document.querySelectorAll('.checkbox-item').forEach(function(el) {
+    el.classList.remove('checked');
+    el.querySelector('input').checked = false;
+  });
+  // Limpar campos
+  document.querySelectorAll('textarea').forEach(function(el) { el.value = ''; });
+  document.querySelectorAll('select').forEach(function(el) { el.selectedIndex = 0; });
+  // Limpar fotos
+  fotos = [];
+  renderFotos();
+  // Limpar erros
+  document.querySelectorAll('.field-error').forEach(function(el) { el.style.display = 'none'; });
+  document.querySelectorAll('.invalid').forEach(function(el) { el.classList.remove('invalid'); });
+  document.querySelectorAll('.error-msg').forEach(function(el) { el.style.display = 'none'; });
+  // Re-habilitar botoes
+  document.querySelectorAll('.submit-btn').forEach(function(el) { el.disabled = false; });
+}
+</script>
+</body>
+</html>
