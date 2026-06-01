@@ -131,9 +131,10 @@ textarea::placeholder{color:#aaa}
         <option value="Ana Laura">Ana Laura</option>
         <option value="Benedito">Benedito</option>
         <option value="Douglas">Douglas</option>
+        <option value="Eliventon">Eliventon</option>
+        <option value="Luiz">Luiz</option>
         <option value="Robson">Robson</option>
         <option value="Tailisia">Tailisia</option>
-        <option value="Eliventon">Eliventon</option>
         <option value="Outro">Outro</option>
       </select>
       <div class="fe" id="eV">Selecione o vendedor</div>
@@ -150,7 +151,7 @@ textarea::placeholder{color:#aaa}
       <div class="fe" id="eNV">Selecione pelo menos um tipo</div>
     </div></div>
     <div class="fc"><div class="fg">
-      <span>Descricao <span class="rq">*</span></span>
+      <span>Descricao (opcional)</span>
       <textarea id="dV" placeholder="Descreva a nao conformidade com detalhes..."></textarea>
       <div class="fe" id="eDV">A descricao e obrigatoria</div>
     </div></div>
@@ -183,7 +184,7 @@ textarea::placeholder{color:#aaa}
       <div class="fe" id="eNC">Selecione pelo menos um tipo</div>
     </div></div>
     <div class="fc"><div class="fg">
-      <span>Descricao <span class="rq">*</span></span>
+      <span>Descricao (opcional)</span>
       <textarea id="dC" placeholder="Descreva a nao conformidade com detalhes..."></textarea>
       <div class="fe" id="eDC">A descricao e obrigatoria</div>
     </div></div>
@@ -205,7 +206,7 @@ textarea::placeholder{color:#aaa}
       <div class="fe" id="eNF">Selecione pelo menos um tipo</div>
     </div></div>
     <div class="fc"><div class="fg">
-      <span>Descricao <span class="rq">*</span></span>
+      <span>Descricao (opcional)</span>
       <textarea id="dF" placeholder="Descreva a nao conformidade com detalhes..."></textarea>
       <div class="fe" id="eDF">A descricao e obrigatoria</div>
     </div></div>
@@ -324,8 +325,7 @@ function validar(){
     document.getElementById('eN'+setor[0].toUpperCase()).style.display='block';ok=false;
   }
   var did=setor==='vendas'?'dV':setor==='caixa'?'dC':'dF';
-  var ta=document.getElementById(did);
-  if(!ta.value.trim()){ta.classList.add('iv');document.getElementById('eD'+setor[0].toUpperCase()).style.display='block';ok=false}
+  // descricao e opcional
   return ok;
 }
 
