@@ -159,8 +159,8 @@ textarea::placeholder{color:#aaa}
       <span>Fotos (opcional)</span>
       <div class="fa">
         <div class="fb">
-          <button type="button" class="ft" id="btnCam"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>Camera<input type="file" accept="image/*" capture="environment" multiple></button>
-          <button type="button" class="ft" id="btnGal"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Galeria<input type="file" accept="image/*" multiple></button>
+          <label class="ft" for="inpCam"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>Camera<input type="file" id="inpCam" accept="image/*" capture="environment" multiple></label>
+          <label class="ft" for="inpGal"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Galeria<input type="file" id="inpGal" accept="image/*" multiple></label>
         </div>
         <div class="fp" id="fPrev"></div>
         <div class="fcc" id="fCnt"></div>
@@ -192,8 +192,8 @@ textarea::placeholder{color:#aaa}
       <span>Fotos (opcional)</span>
       <div class="fa">
         <div class="fb">
-          <button type="button" class="ft" id="btnCamC"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>Camera<input type="file" accept="image/*" capture="environment" multiple></button>
-          <button type="button" class="ft" id="btnGalC"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Galeria<input type="file" accept="image/*" multiple></button>
+          <label class="ft" for="inpCamC"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>Camera<input type="file" id="inpCamC" accept="image/*" capture="environment" multiple></label>
+          <label class="ft" for="inpGalC"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Galeria<input type="file" id="inpGalC" accept="image/*" multiple></label>
         </div>
         <div class="fp" id="fPrevC"></div>
         <div class="fcc" id="fCntC"></div>
@@ -226,8 +226,8 @@ textarea::placeholder{color:#aaa}
       <span>Fotos (opcional)</span>
       <div class="fa">
         <div class="fb">
-          <button type="button" class="ft" id="btnCamF"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>Camera<input type="file" accept="image/*" capture="environment" multiple></button>
-          <button type="button" class="ft" id="btnGalF"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Galeria<input type="file" accept="image/*" multiple></button>
+          <label class="ft" for="inpCamF"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>Camera<input type="file" id="inpCamF" accept="image/*" capture="environment" multiple></label>
+          <label class="ft" for="inpGalF"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Galeria<input type="file" id="inpGalF" accept="image/*" multiple></label>
         </div>
         <div class="fp" id="fPrevF"></div>
         <div class="fcc" id="fCntF"></div>
@@ -292,11 +292,7 @@ document.querySelectorAll('.ci').forEach(function(el){
 });
 
 // FOTOS
-document.querySelectorAll('.ft').forEach(function(b){
-  b.addEventListener('click',function(){
-    this.querySelector('input').click();
-  });
-});
+// foto labels ativam o input nativamente
 document.querySelectorAll('.ft input').forEach(function(inp){
   inp.addEventListener('change',function(){
     var s = setor;
