@@ -188,6 +188,17 @@ textarea::placeholder{color:#aaa}
       <textarea id="dC" placeholder="Descreva a nao conformidade com detalhes..."></textarea>
       <div class="fe" id="eDC">A descricao e obrigatoria</div>
     </div></div>
+    <div class="fc"><div class="fg">
+      <span>Fotos (opcional)</span>
+      <div class="fa">
+        <div class="fb">
+          <button type="button" class="ft" id="btnCamC"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>Camera<input type="file" accept="image/*" capture="environment" multiple></button>
+          <button type="button" class="ft" id="btnGalC"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Galeria<input type="file" accept="image/*" multiple></button>
+        </div>
+        <div class="fp" id="fPrevC"></div>
+        <div class="fcc" id="fCntC"></div>
+      </div>
+    </div></div>
     <div class="em" id="erC"></div>
     <button class="su" id="bC">REGISTRAR NAO CONFORMIDADE</button>
   </div>
@@ -211,6 +222,17 @@ textarea::placeholder{color:#aaa}
       <textarea id="dF" placeholder="Descreva a nao conformidade com detalhes..."></textarea>
       <div class="fe" id="eDF">A descricao e obrigatoria</div>
     </div></div>
+    <div class="fc"><div class="fg">
+      <span>Fotos (opcional)</span>
+      <div class="fa">
+        <div class="fb">
+          <button type="button" class="ft" id="btnCamF"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>Camera<input type="file" accept="image/*" capture="environment" multiple></button>
+          <button type="button" class="ft" id="btnGalF"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Galeria<input type="file" accept="image/*" multiple></button>
+        </div>
+        <div class="fp" id="fPrevF"></div>
+        <div class="fcc" id="fCntF"></div>
+      </div>
+    </div></div>
     <div class="em" id="erF"></div>
     <button class="su" id="bF">REGISTRAR NAO CONFORMIDADE</button>
   </div>
@@ -233,7 +255,7 @@ textarea::placeholder{color:#aaa}
 <script>
 var URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbzOfOKPOvAz6lU03uSYahSsDdmB01v5ZiWHUDZJX_jZ_yI3I9_Q_InOG2zFmeEctf4F/exec';
 var setor = null;
-var fotos = [];
+var fotos = {vendas:[], caixa:[], financeiro:[]};
 var CORES = {vendas:'#E31E24',caixa:'#e67e22',financeiro:'#000080'};
 
 function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
@@ -277,13 +299,14 @@ document.querySelectorAll('.ft').forEach(function(b){
 });
 document.querySelectorAll('.ft input').forEach(function(inp){
   inp.addEventListener('change',function(){
+    var s = setor;
     for(var i=0;i<this.files.length;i++){
       if(!this.files[i].type.startsWith('image/'))continue;
-      (function(f){
+      (function(f,sec){
         var r=new FileReader();
-        r.onload=function(e){fotos.push({file:f,url:e.target.result});renderF()};
+        r.onload=function(e){fotos[sec].push({file:f,url:e.target.result});renderF(sec)};
         r.readAsDataURL(f);
-      })(this.files[i]);
+      })(this.files[i],s);
     }
   });
 });
@@ -346,12 +369,14 @@ async function enviar(){
     var pay={setor:setor,tipos:tipos.join(', '),descricao:desc,dataHora:new Date().toLocaleString('pt-BR',{timeZone:'America/Cuiaba'})};
     if(setor==='vendas'){
       pay.vendedor=document.getElementById('vendedor').value;
+    }
+    if(fotos[setor].length>0){
       bar.style.width='20%';txt.textContent='Comprimindo fotos...';
       var fb=[];
-      for(var i=0;i<fotos.length;i++){
-        txt.textContent='Foto '+(i+1)+'/'+fotos.length;
-        bar.style.width=(20+i/fotos.length*40)+'%';
-        fb.push(await comprimir(fotos[i].url));
+      for(var i=0;i<fotos[setor].length;i++){
+        txt.textContent='Foto '+(i+1)+'/'+fotos[setor].length;
+        bar.style.width=(20+i/fotos[setor].length*40)+'%';
+        fb.push(await comprimir(fotos[setor][i].url));
       }
       pay.fotos=fb;pay.qtdFotos=fb.length;
     }
@@ -398,7 +423,7 @@ function limpar(){
   document.querySelectorAll('.ci').forEach(function(e){e.classList.remove('ck');e.querySelector('input').checked=false});
   document.querySelectorAll('textarea').forEach(function(e){e.value=''});
   document.querySelectorAll('select').forEach(function(e){e.selectedIndex=0});
-  fotos=[];renderF();
+  fotos={vendas:[],caixa:[],financeiro:[]};renderF('vendas');renderF('caixa');renderF('financeiro');
   document.querySelectorAll('.fe').forEach(function(e){e.style.display='none'});
   document.querySelectorAll('.iv').forEach(function(e){e.classList.remove('iv')});
   document.querySelectorAll('.em').forEach(function(e){e.style.display='none'});
