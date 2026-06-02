@@ -307,18 +307,22 @@ function handleFoto(inp){
   }
   inp.value='';
 }
-function renderF(){
-  var p=document.getElementById('fPrev'),c=document.getElementById('fCnt');
+function renderF(sec){
+  if(!sec)sec=setor;
+  if(!sec)return;
+  var suffix=sec==='vendas'?'':sec==='caixa'?'C':'F';
+  var p=document.getElementById('fPrev'+suffix),c=document.getElementById('fCnt'+suffix);
+  if(!p||!c)return;
   p.innerHTML='';
-  fotos.forEach(function(f,i){
+  fotos[sec].forEach(function(f,i){
     var d=document.createElement('div');d.className='th';
     d.innerHTML='<img src="'+f.url+'"><button class="rm">x</button>';
     d.querySelector('.rm').addEventListener('click',function(e){
-      e.stopPropagation();fotos.splice(i,1);renderF();
+      e.stopPropagation();fotos[sec].splice(i,1);renderF(sec);
     });
     p.appendChild(d);
   });
-  c.textContent=fotos.length?fotos.length+' foto(s)':'';
+  c.textContent=fotos[sec].length?fotos[sec].length+' foto(s)':'';
 }
 
 function comprimir(u){
